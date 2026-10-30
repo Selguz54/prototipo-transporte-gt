@@ -166,19 +166,22 @@ function crearSolicitud() {
   const origen = document.getElementById("origen").value.trim();
   const destino = document.getElementById("destino").value.trim();
   const kilometros = Number(document.getElementById("kilometros").value);
-  const tarifa = Number(document.getElementById("tarifa").value);
+  const tarifaIngresada = Number(document.getElementById("tarifa").value);
 
   if (
     !origen ||
     !destino ||
     !Number.isFinite(kilometros) ||
     kilometros <= 0 ||
-    !Number.isFinite(tarifa) ||
-    tarifa <= 0
+    !Number.isFinite(tarifaIngresada) ||
+    tarifaIngresada <= 0
   ) {
     mostrarAviso("Completa todos los datos con valores válidos.");
     return;
   }
+
+  const tarifaMinima = Math.round(kilometros * 2.70 * 100) / 100;
+  const tarifa = Math.max(tarifaIngresada, tarifaMinima);
 
   const perfil = JSON.parse(localStorage.getItem("movgt_pasajero"));
 
@@ -193,6 +196,7 @@ function crearSolicitud() {
     kilometros,
     tarifa,
     tarifaOriginal: tarifa,
+    tarifaMinima,
     pasajero: perfil.nombre,
     estado: "pendiente"
   };
@@ -209,6 +213,7 @@ function crearSolicitud() {
       <p>Salida: ${escapar(origen)}</p>
       <p>Destino: ${escapar(destino)}</p>
       <p>Distancia estimada: ${dinero(kilometros)} km</p>
+      <p>Tarifa mínima: Q${dinero(tarifaMinima)}</p>
       <p>Tu propuesta: Q${dinero(tarifa)}</p>
 
       <button class="primary" onclick="consultarEstado()">Consultar respuesta</button>
@@ -216,6 +221,10 @@ function crearSolicitud() {
   `;
 
   activarPantalla("pasajero");
+
+  if (tarifaIngresada < tarifaMinima) {
+    mostrarAviso("Tu propuesta se ajustó automáticamente a la tarifa mínima.");
+  }
 }
 
 function verSolicitudes() {
@@ -244,7 +253,13 @@ function verSolicitudes() {
         </div>
       `;
     } else {
-      const ofertas = calcularOfertas(viaje.tarifaOriginal, viaje.kilometros);
+      const tarifaMinima = viaje.tarifaMinima || Math.round(viaje.kilometros * 2.70 * 100) / 100;
+      const ofertasBase = calcularOfertas(viaje.tarifaOriginal, viaje.kilometros);
+      const ofertas = [...new Set(
+        ofertasBase.map(oferta =>
+          Math.max(Number(oferta), tarifaMinima).toFixed(2)
+        )
+      )].map(Number);
 
       contenido += `
         <div class="panel">
@@ -253,8 +268,9 @@ function verSolicitudes() {
           <p>Salida: ${escapar(viaje.origen)}</p>
           <p>Destino: ${escapar(viaje.destino)}</p>
           <p>Distancia: ${dinero(viaje.kilometros)} km</p>
+          <p>Tarifa mínima: Q${dinero(tarifaMinima)}</p>
 
-          <div style="margin-top:22px;padding:17px;border-radius:16px;background:rgba(0,230,165,.09);border:1px solid rgba(0,230,165,.2)">
+          <div style="margin-top:18px;padding:15px;border-radius:16px;background:rgba(0,230,165,.09);border:1px solid rgba(0,230,165,.2)">
             <small style="color:#a8bbc8">RECIBES PARA TI</small>
             <div style="font-size:36px;font-weight:900;color:#00e6a5;margin:5px 0">
               Q${dinero(gananciaNeta(viaje.tarifaOriginal))}
@@ -262,26 +278,32 @@ function verSolicitudes() {
             <small style="color:#a8bbc8">El pasajero paga Q${dinero(viaje.tarifaOriginal)}</small>
           </div>
 
-          <h2 style="margin-top:24px">Otras ofertas</h2>
+          <h2 style="margin-top:22px">Otras ofertas</h2>
+
+          <div style="display:flex;gap:9px;overflow-x:auto;padding:5px 0 12px">
       `;
 
-      ofertas.forEach(function(oferta, indice) {
-        if (indice === 0) return;
+      ofertas.forEach(function(oferta) {
+        if (oferta === Number(viaje.tarifaOriginal)) return;
 
         contenido += `
-          <div style="padding:14px 0;border-bottom:1px solid #294354">
-            <div style="font-size:25px;font-weight:800;color:#00e6a5">
-              Q${dinero(gananciaNeta(oferta))}
+          <div style="flex:0 0 112px;min-width:112px;padding:10px 8px;border-radius:13px;background:rgba(0,230,165,.07);border:1px solid rgba(0,230,165,.2);text-align:center">
+            <div style="font-size:20px;font-weight:800;color:#00e6a5">
+              Q${dinero(oferta)}
             </div>
-            <small style="color:#a8bbc8">El pasajero paga Q${dinero(oferta)}</small>
-            <button class="primary" onclick="seleccionarOferta(${oferta})">
-              Proponer esta tarifa
+            <small style="display:block;color:#a8bbc8;margin:5px 0">
+              Recibes Q${dinero(gananciaNeta(oferta))}
+            </small>
+            <button class="primary" style="font-size:12px;padding:9px 5px;width:100%" onclick="seleccionarOferta(${oferta})">
+              Proponer
             </button>
           </div>
         `;
       });
 
       contenido += `
+          </div>
+
           <button class="primary" onclick="seleccionarOferta(${Number(viaje.tarifaOriginal)})">
             Aceptar oferta del pasajero
           </button>
@@ -300,8 +322,12 @@ function seleccionarOferta(precio) {
   if (!viaje || viaje.estado !== "pendiente") return;
 
   const tarifa = Number(precio);
+  const tarifaMinima = viaje.tarifaMinima || Math.round(viaje.kilometros * 2.70 * 100) / 100;
 
-  if (!Number.isFinite(tarifa) || tarifa <= 0) return;
+  if (!Number.isFinite(tarifa) || tarifa < tarifaMinima) {
+    mostrarAviso("No puedes proponer menos de la tarifa mínima.");
+    return;
+  }
 
   if (tarifa === Number(viaje.tarifaOriginal)) {
     viaje.tarifa = tarifa;
@@ -320,7 +346,6 @@ function seleccionarOferta(precio) {
   mostrarAviso("Contraoferta enviada al pasajero.");
   verSolicitudes();
 }
-
 function aceptarViaje() {
   const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
   if (!viaje) return;

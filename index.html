@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101820">
+  <title>Transporte GT</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">MOV<span>GT</span></div>
+    <p>Movilidad hecha en Guatemala</p>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <span class="tag">PROYECTO GUATEMALTECO</span>
+      <h1>Muévete a tu manera.</h1>
+      <p>
+        Una nueva forma de conectar pasajeros y conductores,
+        con tarifas transparentes y condiciones justas para ambos.
+      </p>
+    </section>
+
+    <section class="options">
+      <button class="option" onclick="seleccionarRol('pasajero')">
+        <span class="option-icon">🧍</span>
+        <span>
+          <strong>Quiero viajar</strong>
+          <small>Solicitar un viaje en motocicleta</small>
+        </span>
+        <span class="arrow">›</span>
+      </button>
+
+      <button class="option" onclick="seleccionarRol('conductor')">
+        <span class="option-icon">🏍️</span>
+        <span>
+          <strong>Quiero conducir</strong>
+          <small>Ofrecer viajes y recibir solicitudes</small>
+        </span>
+        <span class="arrow">›</span>
+      </button>
+    </section>
+
+    <section id="mensaje" class="message">
+      Selecciona cómo deseas comenzar.
+    </section>
+
+    <footer>
+      <p>Una plataforma pensada para Guatemala 🇬🇹</p>
+      <small>Prototipo en desarrollo · Versión 0.1</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -115,3 +115,113 @@ function escapar(texto) {
 function cerrarSesion() {
   location.reload();
 }
+function abrirSolicitud() {
+  const pantalla = document.getElementById("pasajero");
+
+  pantalla.innerHTML = `
+    <button class="back" onclick="mostrarPantalla('pasajero')">
+      ← Volver a mi perfil
+    </button>
+
+    <span class="tag">NUEVO VIAJE</span>
+    <h1>¿A dónde vamos?</h1>
+    <p>Indica tu recorrido y cuánto propones pagar.</p>
+
+    <div class="panel">
+      <label>Punto de partida</label>
+      <input id="origen" type="text" placeholder="Ej. Zona 1">
+
+      <label>Destino</label>
+      <input id="destino" type="text" placeholder="Ej. Zona 10">
+
+      <label>Tu propuesta de tarifa (Q)</label>
+      <input id="tarifa" type="number" min="1" step="0.50" placeholder="Ej. 25">
+
+      <button class="primary" onclick="crearSolicitud()">
+        Buscar conductor
+      </button>
+    </div>
+  `;
+
+  activarPantalla("pasajero");
+}
+
+function crearSolicitud() {
+  const origen = document.getElementById("origen").value.trim();
+  const destino = document.getElementById("destino").value.trim();
+  const tarifa = Number(document.getElementById("tarifa").value);
+
+  if (!origen || !destino || !Number.isFinite(tarifa) || tarifa <= 0) {
+    mostrarAviso("Completa los datos y escribe una tarifa válida.");
+    return;
+  }
+
+  const perfil = JSON.parse(localStorage.getItem("movgt_pasajero"));
+
+  const viaje = {
+    origen: origen,
+    destino: destino,
+    tarifa: tarifa,
+    pasajero: perfil.nombre,
+    estado: "pendiente"
+  };
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  document.getElementById("pasajero").innerHTML = `
+    <button class="back" onclick="mostrarPantalla('pasajero')">
+      ← Volver a mi perfil
+    </button>
+
+    <span class="tag">SOLICITUD ENVIADA</span>
+    <h1>¡Estamos buscando!</h1>
+
+    <div class="panel">
+      <h2>Resumen de tu viaje</h2>
+      <p>Salida: ${escapar(origen)}</p>
+      <p>Destino: ${escapar(destino)}</p>
+      <p>Tarifa propuesta: Q${tarifa.toFixed(2)}</p>
+      <p>Estado: Esperando conductor</p>
+    </div>
+  `;
+
+  activarPantalla("pasajero");
+}
+
+function verSolicitudes() {
+  const pantalla = document.getElementById("conductor");
+  const guardado = localStorage.getItem("movgt_viaje");
+
+  let contenido = `
+    <button class="back" onclick="mostrarPantalla('conductor')">
+      ← Volver a mi perfil
+    </button>
+
+    <span class="tag">SOLICITUDES DE VIAJE</span>
+    <h1>Viajes disponibles</h1>
+  `;
+
+  if (!guardado) {
+    contenido += `
+      <div class="panel">
+        <p>Por ahora no hay solicitudes disponibles.</p>
+      </div>
+    `;
+  } else {
+    const viaje = JSON.parse(guardado);
+
+    contenido += `
+      <div class="panel">
+        <h2>Solicitud de viaje</h2>
+        <p>Pasajero: ${escapar(viaje.pasajero)}</p>
+        <p>Salida: ${escapar(viaje.origen)}</p>
+        <p>Destino: ${escapar(viaje.destino)}</p>
+        <p>Tarifa propuesta: Q${viaje.tarifa.toFixed(2)}</p>
+        <p>Estado: ${escapar(viaje.estado)}</p>
+      </div>
+    `;
+  }
+
+  pantalla.innerHTML = contenido;
+  activarPantalla("conductor");
+}

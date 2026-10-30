@@ -116,7 +116,87 @@ function cerrarSesion() {
   location.reload();
 }
 function abrirSolicitud() {
-  const pantalla = document.getElementById("pasajero");
+  const pantalla = 
+document.getElementById("pasajero").innerHTML = `
+  <button class="back" onclick="mostrarPantalla('pasajero')">
+    ← Volver a mi perfil
+  </button>
+
+  <span class="tag">SOLICITUD ENVIADA</span>
+  <h1>¡Estamos buscando!</h1>
+
+  <div class="panel">
+    <h2>Resumen de tu viaje</h2>
+    <p>Salida: ${escapar(origen)}</p>
+    <p>Destino: ${escapar(destino)}</p>
+    <p>Tarifa propuesta: Q${tarifa.toFixed(2)}</p>
+
+    <button class="primary" onclick="consultarEstado()">
+      Consultar respuesta
+    </button>
+  </div>
+`;
+```
+
+Por último, agrega esta función al final de `app.js`:
+
+<CodeBlock language="javascript" editable>
+function consultarEstado() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  if (!viaje) {
+    mostrarAviso("No encontramos una solicitud.");
+    return;
+  }
+
+  let contenido = `
+    <button class="back" onclick="mostrarPantalla('pasajero')">
+      ← Volver a mi perfil
+    </button>
+
+    <span class="tag">ESTADO DE TU VIAJE</span>
+    <h1>Tu solicitud</h1>
+
+    <div class="panel">
+      <p>Salida: ${escapar(viaje.origen)}</p>
+      <p>Destino: ${escapar(viaje.destino)}</p>
+      <p>Tarifa: Q${Number(viaje.tarifa).toFixed(2)}</p>
+  `;
+
+  if (viaje.estado === "pendiente") {
+    contenido += `<p>Esperando respuesta del conductor.</p>`;
+  } else if (viaje.estado === "aceptado") {
+    contenido += `<p>¡El conductor aceptó tu tarifa!</p>`;
+  } else if (viaje.estado === "contraoferta") {
+    contenido += `
+      <p>El conductor propone Q${Number(viaje.tarifa).toFixed(2)}.</p>
+      <button class="primary" onclick="responderContraoferta(true)">
+        Aceptar tarifa
+      </button>
+      <button class="primary" onclick="responderContraoferta(false)">
+        Rechazar tarifa
+      </button>
+    `;
+  } else {
+    contenido += `<p>La solicitud fue rechazada.</p>`;
+  }
+
+  contenido += `</div>`;
+
+  document.getElementById("pasajero").innerHTML = contenido;
+  activarPantalla("pasajero");
+}
+
+function responderContraoferta(aceptar) {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  viaje.estado = aceptar ? "aceptado" : "rechazado";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  consultarEstado();
+}
+;
 
   pantalla.innerHTML = `
     <button class="back" onclick="mostrarPantalla('pasajero')">
@@ -196,7 +276,6 @@ function verSolicitudes() {
     <button class="back" onclick="mostrarPantalla('conductor')">
       ← Volver a mi perfil
     </button>
-
     <span class="tag">SOLICITUDES DE VIAJE</span>
     <h1>Viajes disponibles</h1>
   `;
@@ -216,12 +295,51 @@ function verSolicitudes() {
         <p>Pasajero: ${escapar(viaje.pasajero)}</p>
         <p>Salida: ${escapar(viaje.origen)}</p>
         <p>Destino: ${escapar(viaje.destino)}</p>
-        <p>Tarifa propuesta: Q${viaje.tarifa.toFixed(2)}</p>
+        <p>Tarifa propuesta: Q${Number(viaje.tarifa).toFixed(2)}</p>
         <p>Estado: ${escapar(viaje.estado)}</p>
+
+        ${viaje.estado === "pendiente" ? `
+          <button class="primary" onclick="aceptarViaje()">
+            Aceptar Q${Number(viaje.tarifa).toFixed(2)}
+          </button>
+          <button class="primary" onclick="proponerTarifa()">
+            Proponer otra tarifa
+          </button>
+        ` : ""}
       </div>
     `;
   }
 
   pantalla.innerHTML = contenido;
   activarPantalla("conductor");
+}
+
+function aceptarViaje() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+  viaje.estado = "aceptado";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  verSolicitudes();
+}
+
+function proponerTarifa() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  const propuesta = Number(
+    prompt("¿Cuánto propones cobrar en quetzales?")
+  );
+
+  if (!Number.isFinite(propuesta) || propuesta <= 0) {
+    alert("Escribe una tarifa válida.");
+    return;
+  }
+
+  viaje.tarifaOriginal = viaje.tarifa;
+  viaje.tarifa = propuesta;
+  viaje.estado = "contraoferta";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  verSolicitudes();
 }

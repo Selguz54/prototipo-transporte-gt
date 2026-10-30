@@ -216,12 +216,53 @@ function verSolicitudes() {
         <p>Pasajero: ${escapar(viaje.pasajero)}</p>
         <p>Salida: ${escapar(viaje.origen)}</p>
         <p>Destino: ${escapar(viaje.destino)}</p>
-        <p>Tarifa propuesta: Q${viaje.tarifa.toFixed(2)}</p>
+        <p>Tarifa: Q${Number(viaje.tarifa).toFixed(2)}</p>
         <p>Estado: ${escapar(viaje.estado)}</p>
+
+        <button class="primary" onclick="aceptarViaje()">
+          Aceptar tarifa
+        </button>
+
+        <button class="primary" onclick="proponerTarifa()">
+          Proponer otra tarifa
+        </button>
       </div>
     `;
   }
 
   pantalla.innerHTML = contenido;
   activarPantalla("conductor");
+}
+
+function aceptarViaje() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  if (!viaje) return;
+
+  viaje.estado = "aceptado";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  mostrarAviso("¡Has aceptado el viaje!");
+}
+
+function proponerTarifa() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  if (!viaje) return;
+
+  const nuevaTarifa = Number(prompt("¿Cuánto propones cobrar en quetzales?"));
+
+  if (!Number.isFinite(nuevaTarifa) || nuevaTarifa <= 0) {
+    mostrarAviso("Escribe una tarifa válida.");
+    return;
+  }
+
+  viaje.tarifaOriginal = viaje.tarifa;
+  viaje.tarifa = nuevaTarifa;
+  viaje.estado = "contraoferta";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  mostrarAviso("Contraoferta enviada al pasajero.");
 }

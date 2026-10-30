@@ -266,3 +266,60 @@ function proponerTarifa() {
 
   mostrarAviso("Contraoferta enviada al pasajero.");
 }
+function consultarEstado() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  if (!viaje) {
+    mostrarAviso("No encontramos una solicitud.");
+    return;
+  }
+
+  let contenido = `
+    <button class="back" onclick="mostrarPantalla('pasajero')">
+      ← Volver a mi perfil
+    </button>
+
+    <span class="tag">ESTADO DE TU VIAJE</span>
+    <h1>Tu solicitud</h1>
+
+    <div class="panel">
+      <p>Salida: ${escapar(viaje.origen)}</p>
+      <p>Destino: ${escapar(viaje.destino)}</p>
+      <p>Tarifa: Q${Number(viaje.tarifa).toFixed(2)}</p>
+  `;
+
+  if (viaje.estado === "pendiente") {
+    contenido += `<p>Esperando respuesta del conductor.</p>`;
+  } else if (viaje.estado === "aceptado") {
+    contenido += `<p>¡El conductor aceptó tu tarifa!</p>`;
+  } else if (viaje.estado === "contraoferta") {
+    contenido += `
+      <p>El conductor propone Q${Number(viaje.tarifa).toFixed(2)}.</p>
+      <button class="primary" onclick="responderContraoferta(true)">
+        Aceptar tarifa
+      </button>
+      <button class="primary" onclick="responderContraoferta(false)">
+        Rechazar tarifa
+      </button>
+    `;
+  } else {
+    contenido += `<p>La solicitud fue rechazada.</p>`;
+  }
+
+  contenido += `</div>`;
+
+  document.getElementById("pasajero").innerHTML = contenido;
+  activarPantalla("pasajero");
+}
+
+function responderContraoferta(aceptar) {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+
+  if (!viaje) return;
+
+  viaje.estado = aceptar ? "aceptado" : "rechazado";
+
+  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+
+  consultarEstado();
+}

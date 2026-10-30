@@ -1,4 +1,29 @@
 
+const COMISION_MOVGT = 0.07;
+const TARIFA_KM = 3;
+const PASO_CONTRAOFERTA = 3;
+
+function dinero(valor) {
+  return Number(valor).toFixed(2);
+}
+
+function gananciaNeta(tarifa) {
+  return Number(tarifa) * (1 - COMISION_MOVGT);
+}
+
+function calcularOfertas(tarifaPasajero, kilometros) {
+  const referencia = kilometros * TARIFA_KM;
+
+  const opciones = [
+    tarifaPasajero,
+    referencia,
+    referencia + PASO_CONTRAOFERTA,
+    referencia + PASO_CONTRAOFERTA * 2
+  ];
+
+  return [...new Set(opciones.map(Number))];
+}
+
 function mostrarPantalla(nombre) {
   if (nombre === "pasajero" || nombre === "conductor") {
     const guardado = localStorage.getItem("movgt_" + nombre);
@@ -23,9 +48,7 @@ function activarPantalla(nombre) {
 
   const destino = document.getElementById(nombre);
 
-  if (destino) {
-    destino.classList.add("active");
-  }
+  if (destino) destino.classList.add("active");
 
   const mensaje = document.getElementById("mensaje");
 
@@ -48,9 +71,7 @@ function registrarUsuario(rol) {
   const pantalla = document.getElementById(rol);
   const campos = pantalla.querySelectorAll("input");
 
-  const valores = Array.from(campos).map(function(campo) {
-    return campo.value.trim();
-  });
+  const valores = Array.from(campos).map(campo => campo.value.trim());
 
   if (valores.some(valor => valor === "")) {
     mostrarAviso("Completa todos los campos para continuar.");
@@ -66,7 +87,6 @@ function registrarUsuario(rol) {
   };
 
   localStorage.setItem("movgt_" + rol, JSON.stringify(perfil));
-
   mostrarPerfil(perfil);
 }
 
@@ -74,10 +94,7 @@ function mostrarPerfil(perfil) {
   const pantalla = document.getElementById(perfil.rol);
 
   pantalla.innerHTML = `
-    <button class="back" onclick="cerrarSesion()">
-      ← Volver al inicio
-    </button>
-
+    <button class="back" onclick="cerrarSesion()">← Volver al inicio</button>
     <span class="tag">MI CUENTA MOVGT</span>
     <h1>¡Hola, ${escapar(perfil.nombre)}!</h1>
     <p>Tu perfil está guardado en este dispositivo.</p>
@@ -91,8 +108,8 @@ function mostrarPerfil(perfil) {
         <p>Placa: ${escapar(perfil.placa)}</p>
       ` : ""}
       <button class="primary" onclick="${perfil.rol === "pasajero" ? "abrirSolicitud()" : "verSolicitudes()"}">
-  ${perfil.rol === "pasajero" ? "Solicitar un viaje" : "Ver solicitudes de viaje"}
-</button>
+        ${perfil.rol === "pasajero" ? "Solicitar un viaje" : "Ver solicitudes de viaje"}
+      </button>
     </div>
   `;
 
@@ -115,14 +132,12 @@ function escapar(texto) {
 function cerrarSesion() {
   location.reload();
 }
+
 function abrirSolicitud() {
   const pantalla = document.getElementById("pasajero");
 
   pantalla.innerHTML = `
-    <button class="back" onclick="mostrarPantalla('pasajero')">
-      ← Volver a mi perfil
-    </button>
-
+    <button class="back" onclick="mostrarPantalla('pasajero')">← Volver a mi perfil</button>
     <span class="tag">NUEVO VIAJE</span>
     <h1>¿A dónde vamos?</h1>
     <p>Indica tu recorrido y cuánto propones pagar.</p>
@@ -134,12 +149,13 @@ function abrirSolicitud() {
       <label>Destino</label>
       <input id="destino" type="text" placeholder="Ej. Zona 10">
 
-      <label>Tu propuesta de tarifa (Q)</label>
-      <input id="tarifa" type="number" min="1" step="0.50" placeholder="Ej. 25">
+      <label>Distancia estimada en kilómetros</label>
+      <input id="kilometros" type="number" min="0.1" step="0.1" placeholder="Ej. 10">
 
-      <button class="primary" onclick="crearSolicitud()">
-        Buscar conductor
-      </button>
+      <label>Tu propuesta de tarifa (Q)</label>
+      <input id="tarifa" type="number" min="1" step="0.50" placeholder="Ej. 27">
+
+      <button class="primary" onclick="crearSolicitud()">Buscar conductor</button>
     </div>
   `;
 
@@ -149,19 +165,34 @@ function abrirSolicitud() {
 function crearSolicitud() {
   const origen = document.getElementById("origen").value.trim();
   const destino = document.getElementById("destino").value.trim();
+  const kilometros = Number(document.getElementById("kilometros").value);
   const tarifa = Number(document.getElementById("tarifa").value);
 
-  if (!origen || !destino || !Number.isFinite(tarifa) || tarifa <= 0) {
-    mostrarAviso("Completa los datos y escribe una tarifa válida.");
+  if (
+    !origen ||
+    !destino ||
+    !Number.isFinite(kilometros) ||
+    kilometros <= 0 ||
+    !Number.isFinite(tarifa) ||
+    tarifa <= 0
+  ) {
+    mostrarAviso("Completa todos los datos con valores válidos.");
     return;
   }
 
   const perfil = JSON.parse(localStorage.getItem("movgt_pasajero"));
 
+  if (!perfil) {
+    mostrarAviso("No encontramos tu perfil de pasajero.");
+    return;
+  }
+
   const viaje = {
-    origen: origen,
-    destino: destino,
-    tarifa: tarifa,
+    origen,
+    destino,
+    kilometros,
+    tarifa,
+    tarifaOriginal: tarifa,
     pasajero: perfil.nombre,
     estado: "pendiente"
   };
@@ -169,10 +200,7 @@ function crearSolicitud() {
   localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
 
   document.getElementById("pasajero").innerHTML = `
-    <button class="back" onclick="mostrarPantalla('pasajero')">
-      ← Volver a mi perfil
-    </button>
-
+    <button class="back" onclick="mostrarPantalla('pasajero')">← Volver a mi perfil</button>
     <span class="tag">SOLICITUD ENVIADA</span>
     <h1>¡Estamos buscando!</h1>
 
@@ -180,11 +208,10 @@ function crearSolicitud() {
       <h2>Resumen de tu viaje</h2>
       <p>Salida: ${escapar(origen)}</p>
       <p>Destino: ${escapar(destino)}</p>
-      <p>Tarifa propuesta: Q${tarifa.toFixed(2)}</p>
+      <p>Distancia estimada: ${dinero(kilometros)} km</p>
+      <p>Tu propuesta: Q${dinero(tarifa)}</p>
 
-      <button class="primary" onclick="consultarEstado()">
-        Consultar respuesta
-      </button>
+      <button class="primary" onclick="consultarEstado()">Consultar respuesta</button>
     </div>
   `;
 
@@ -196,10 +223,7 @@ function verSolicitudes() {
   const guardado = localStorage.getItem("movgt_viaje");
 
   let contenido = `
-    <button class="back" onclick="mostrarPantalla('conductor')">
-      ← Volver a mi perfil
-    </button>
-
+    <button class="back" onclick="mostrarPantalla('conductor')">← Volver a mi perfil</button>
     <span class="tag">SOLICITUDES DE VIAJE</span>
     <h1>Viajes disponibles</h1>
   `;
@@ -213,62 +237,100 @@ function verSolicitudes() {
   } else {
     const viaje = JSON.parse(guardado);
 
-    contenido += `
-      <div class="panel">
-        <h2>Solicitud de viaje</h2>
-        <p>Pasajero: ${escapar(viaje.pasajero)}</p>
-        <p>Salida: ${escapar(viaje.origen)}</p>
-        <p>Destino: ${escapar(viaje.destino)}</p>
-        <p>Tarifa: Q${Number(viaje.tarifa).toFixed(2)}</p>
-        <p>Estado: ${escapar(viaje.estado)}</p>
+    if (viaje.estado === "aceptado" || viaje.estado === "rechazado") {
+      contenido += `
+        <div class="panel">
+          <p>Esta solicitud ya fue ${escapar(viaje.estado)}.</p>
+        </div>
+      `;
+    } else {
+      const ofertas = calcularOfertas(viaje.tarifaOriginal, viaje.kilometros);
 
-        <button class="primary" onclick="aceptarViaje()">
-          Aceptar tarifa
-        </button>
+      contenido += `
+        <div class="panel">
+          <h2>Solicitud de viaje</h2>
+          <p>Pasajero: ${escapar(viaje.pasajero)}</p>
+          <p>Salida: ${escapar(viaje.origen)}</p>
+          <p>Destino: ${escapar(viaje.destino)}</p>
+          <p>Distancia: ${dinero(viaje.kilometros)} km</p>
 
-        <button class="primary" onclick="proponerTarifa()">
-          Proponer otra tarifa
-        </button>
-      </div>
-    `;
+          <div style="margin-top:22px;padding:17px;border-radius:16px;background:rgba(0,230,165,.09);border:1px solid rgba(0,230,165,.2)">
+            <small style="color:#a8bbc8">RECIBES PARA TI</small>
+            <div style="font-size:36px;font-weight:900;color:#00e6a5;margin:5px 0">
+              Q${dinero(gananciaNeta(viaje.tarifaOriginal))}
+            </div>
+            <small style="color:#a8bbc8">El pasajero paga Q${dinero(viaje.tarifaOriginal)}</small>
+          </div>
+
+          <h2 style="margin-top:24px">Otras ofertas</h2>
+      `;
+
+      ofertas.forEach(function(oferta, indice) {
+        if (indice === 0) return;
+
+        contenido += `
+          <div style="padding:14px 0;border-bottom:1px solid #294354">
+            <div style="font-size:25px;font-weight:800;color:#00e6a5">
+              Q${dinero(gananciaNeta(oferta))}
+            </div>
+            <small style="color:#a8bbc8">El pasajero paga Q${dinero(oferta)}</small>
+            <button class="primary" onclick="seleccionarOferta(${oferta})">
+              Proponer esta tarifa
+            </button>
+          </div>
+        `;
+      });
+
+      contenido += `
+          <button class="primary" onclick="seleccionarOferta(${Number(viaje.tarifaOriginal)})">
+            Aceptar oferta del pasajero
+          </button>
+        </div>
+      `;
+    }
   }
 
   pantalla.innerHTML = contenido;
   activarPantalla("conductor");
 }
 
-function aceptarViaje() {
+function seleccionarOferta(precio) {
   const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
 
-  if (!viaje) return;
+  if (!viaje || viaje.estado !== "pendiente") return;
 
-  viaje.estado = "aceptado";
+  const tarifa = Number(precio);
 
-  localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+  if (!Number.isFinite(tarifa) || tarifa <= 0) return;
 
-  mostrarAviso("¡Has aceptado el viaje!");
-}
-
-function proponerTarifa() {
-  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
-
-  if (!viaje) return;
-
-  const nuevaTarifa = Number(prompt("¿Cuánto propones cobrar en quetzales?"));
-
-  if (!Number.isFinite(nuevaTarifa) || nuevaTarifa <= 0) {
-    mostrarAviso("Escribe una tarifa válida.");
+  if (tarifa === Number(viaje.tarifaOriginal)) {
+    viaje.tarifa = tarifa;
+    viaje.estado = "aceptado";
+    localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
+    mostrarAviso("¡Has aceptado la oferta del pasajero!");
+    verSolicitudes();
     return;
   }
 
-  viaje.tarifaOriginal = viaje.tarifa;
-  viaje.tarifa = nuevaTarifa;
+  viaje.tarifa = tarifa;
   viaje.estado = "contraoferta";
 
   localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
 
   mostrarAviso("Contraoferta enviada al pasajero.");
+  verSolicitudes();
 }
+
+function aceptarViaje() {
+  const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
+  if (!viaje) return;
+  seleccionarOferta(viaje.tarifaOriginal);
+}
+
+function proponerTarifa() {
+  verSolicitudes();
+}
+
 function consultarEstado() {
   const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
 
@@ -278,32 +340,32 @@ function consultarEstado() {
   }
 
   let contenido = `
-    <button class="back" onclick="mostrarPantalla('pasajero')">
-      ← Volver a mi perfil
-    </button>
-
+    <button class="back" onclick="mostrarPantalla('pasajero')">← Volver a mi perfil</button>
     <span class="tag">ESTADO DE TU VIAJE</span>
     <h1>Tu solicitud</h1>
 
     <div class="panel">
       <p>Salida: ${escapar(viaje.origen)}</p>
       <p>Destino: ${escapar(viaje.destino)}</p>
-      <p>Tarifa: Q${Number(viaje.tarifa).toFixed(2)}</p>
+      <p>Distancia: ${dinero(viaje.kilometros)} km</p>
   `;
 
   if (viaje.estado === "pendiente") {
-    contenido += `<p>Esperando respuesta del conductor.</p>`;
+    contenido += `
+      <p>Tu oferta: Q${dinero(viaje.tarifaOriginal)}</p>
+      <p>Esperando respuesta del conductor.</p>
+    `;
   } else if (viaje.estado === "aceptado") {
-    contenido += `<p>¡El conductor aceptó tu tarifa!</p>`;
+    contenido += `
+      <h2>¡Viaje aceptado!</h2>
+      <p>Precio acordado: Q${dinero(viaje.tarifa)}</p>
+    `;
   } else if (viaje.estado === "contraoferta") {
     contenido += `
-      <p>El conductor propone Q${Number(viaje.tarifa).toFixed(2)}.</p>
-      <button class="primary" onclick="responderContraoferta(true)">
-        Aceptar tarifa
-      </button>
-      <button class="primary" onclick="responderContraoferta(false)">
-        Rechazar tarifa
-      </button>
+      <h2>El conductor te propone otra tarifa</h2>
+      <p>Precio propuesto: Q${dinero(viaje.tarifa)}</p>
+      <button class="primary" onclick="responderContraoferta(true)">Aceptar tarifa</button>
+      <button class="primary" onclick="responderContraoferta(false)">Rechazar tarifa</button>
     `;
   } else {
     contenido += `<p>La solicitud fue rechazada.</p>`;
@@ -318,7 +380,7 @@ function consultarEstado() {
 function responderContraoferta(aceptar) {
   const viaje = JSON.parse(localStorage.getItem("movgt_viaje"));
 
-  if (!viaje) return;
+  if (!viaje || viaje.estado !== "contraoferta") return;
 
   viaje.estado = aceptar ? "aceptado" : "rechazado";
 

@@ -37,7 +37,27 @@ body {
   width: 100%;
   max-width: 520px;
   margin: auto;
-  padding: 35px 22px;
+  padding: 30px 22px;
+}
+
+.screen {
+  display: none;
+  animation: entrar 0.35s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .welcome {
@@ -52,12 +72,13 @@ body {
 }
 
 h1 {
-  font-size: 38px;
+  font-size: 36px;
   line-height: 1.15;
   margin: 18px 0;
 }
 
-.welcome p {
+.welcome p,
+.screen > p {
   color: #aab7c2;
   line-height: 1.7;
   font-size: 15px;
@@ -82,10 +103,11 @@ h1 {
   padding: 20px 15px;
   text-align: left;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .option:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .option-icon {
@@ -113,6 +135,64 @@ h1 {
   font-size: 28px;
 }
 
+.back {
+  background: transparent;
+  color: #20d6a0;
+  border: none;
+  font-size: 14px;
+  margin: 10px 0 30px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.panel {
+  background: #1b2935;
+  border: 1px solid #344654;
+  border-radius: 16px;
+  padding: 22px;
+  margin-top: 28px;
+}
+
+.panel h2 {
+  font-size: 19px;
+  margin-bottom: 22px;
+}
+
+.panel label {
+  display: block;
+  color: #aab7c2;
+  font-size: 13px;
+  margin: 16px 0 8px;
+}
+
+.panel input {
+  width: 100%;
+  padding: 14px;
+  background: #101820;
+  border: 1px solid #344654;
+  border-radius: 9px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+}
+
+.panel input:focus {
+  border-color: #20d6a0;
+}
+
+.primary {
+  width: 100%;
+  padding: 15px;
+  margin-top: 25px;
+  background: #20d6a0;
+  color: #101820;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .message {
   margin-top: 25px;
   padding: 16px;
@@ -124,7 +204,8 @@ h1 {
 }
 
 footer {
-  margin-top: 65px;
+  margin-top: 50px;
+  padding-bottom: 20px;
   text-align: center;
   color: #91a1ae;
   line-height: 2;

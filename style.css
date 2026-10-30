@@ -1,0 +1,136 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #101820;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.header {
+  padding: 25px 20px;
+  border-bottom: 1px solid #263440;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.logo span {
+  color: #20d6a0;
+}
+
+.header p {
+  color: #91a1ae;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.container {
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: 35px 22px;
+}
+
+.welcome {
+  margin: 35px 0;
+}
+
+.tag {
+  color: #20d6a0;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+h1 {
+  font-size: 38px;
+  line-height: 1.15;
+  margin: 18px 0;
+}
+
+.welcome p {
+  color: #aab7c2;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 35px;
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #1b2935;
+  color: white;
+  border: 1px solid #344654;
+  border-radius: 14px;
+  padding: 20px 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:active {
+  transform: scale(0.98);
+}
+
+.option-icon {
+  font-size: 30px;
+}
+
+.option strong,
+.option small {
+  display: block;
+}
+
+.option strong {
+  font-size: 16px;
+}
+
+.option small {
+  color: #aab7c2;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.arrow {
+  margin-left: auto;
+  color: #20d6a0;
+  font-size: 28px;
+}
+
+.message {
+  margin-top: 25px;
+  padding: 16px;
+  background: #1b2935;
+  border-radius: 10px;
+  color: #20d6a0;
+  font-size: 13px;
+  text-align: center;
+}
+
+footer {
+  margin-top: 65px;
+  text-align: center;
+  color: #91a1ae;
+  line-height: 2;
+  font-size: 12px;
+}
+
+footer small {
+  color: #667784;
+}

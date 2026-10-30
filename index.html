@@ -1,20 +1,24 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#101820">
-  <title>Transporte GT</title>
+  <title>MOVGT - Transporte Guatemala</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header class="header">
-    <div class="logo">MOV<span>GT</span></div>
-    <p>Movilidad hecha en Guatemala</p>
-  </header>
+<header class="header">
+  <div class="logo">MOV<span>GT</span></div>
+  <p>Movilidad hecha en Guatemala</p>
+</header>
 
-  <main class="container">
+<main class="container">
+
+  <!-- INICIO -->
+  <section class="screen active" id="inicio">
     <section class="welcome">
       <span class="tag">PROYECTO GUATEMALTECO</span>
       <h1>Muévete a tu manera.</h1>
@@ -25,7 +29,7 @@
     </section>
 
     <section class="options">
-      <button class="option" onclick="seleccionarRol('pasajero')">
+      <button class="option" onclick="mostrarPantalla('pasajero')">
         <span class="option-icon">🧍</span>
         <span>
           <strong>Quiero viajar</strong>
@@ -34,7 +38,7 @@
         <span class="arrow">›</span>
       </button>
 
-      <button class="option" onclick="seleccionarRol('conductor')">
+      <button class="option" onclick="mostrarPantalla('conductor')">
         <span class="option-icon">🏍️</span>
         <span>
           <strong>Quiero conducir</strong>
@@ -43,17 +47,75 @@
         <span class="arrow">›</span>
       </button>
     </section>
+  </section>
 
-    <section id="mensaje" class="message">
-      Selecciona cómo deseas comenzar.
-    </section>
+  <!-- PASAJERO -->
+  <section class="screen" id="pasajero">
+    <button class="back" onclick="mostrarPantalla('inicio')">
+      ← Volver al inicio
+    </button>
 
-    <footer>
-      <p>Una plataforma pensada para Guatemala 🇬🇹</p>
-      <small>Prototipo en desarrollo · Versión 0.1</small>
-    </footer>
-  </main>
+    <span class="tag">ÁREA DE PASAJEROS</span>
+    <h1>¡Vamos a viajar!</h1>
+    <p>Regístrate para comenzar a utilizar MOVGT.</p>
 
-  <script src="app.js"></script>
+    <div class="panel">
+      <h2>Crear cuenta de pasajero</h2>
+
+      <label>Nombre</label>
+      <input type="text" placeholder="Tu nombre">
+
+      <label>Teléfono</label>
+      <input type="tel" placeholder="Tu número de teléfono">
+
+      <button class="primary" onclick="mostrarAviso('Registro de pasajero: próximamente')">
+        Continuar
+      </button>
+    </div>
+  </section>
+
+  <!-- CONDUCTOR -->
+  <section class="screen" id="conductor">
+    <button class="back" onclick="mostrarPantalla('inicio')">
+      ← Volver al inicio
+    </button>
+
+    <span class="tag">ÁREA DE CONDUCTORES</span>
+    <h1>Conduce con libertad.</h1>
+    <p>Conoce una plataforma donde tus condiciones también importan.</p>
+
+    <div class="panel">
+      <h2>Registro de conductor</h2>
+
+      <label>Nombre</label>
+      <input type="text" placeholder="Tu nombre">
+
+      <label>Teléfono</label>
+      <input type="tel" placeholder="Tu número de teléfono">
+
+      <label>Motocicleta</label>
+      <input type="text" placeholder="Marca y modelo">
+
+      <label>Placa</label>
+      <input type="text" placeholder="Placa de la motocicleta">
+
+      <button class="primary" onclick="mostrarAviso('Registro de conductor: próximamente')">
+        Continuar
+      </button>
+    </div>
+  </section>
+
+  <div id="mensaje" class="message">
+    Una plataforma pensada para Guatemala 🇬🇹
+  </div>
+
+  <footer>
+    <p>MOVGT · Movilidad hecha en Guatemala 🇬🇹</p>
+    <small>Prototipo en desarrollo · Versión 0.2</small>
+  </footer>
+
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>

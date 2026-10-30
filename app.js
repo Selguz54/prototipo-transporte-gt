@@ -169,6 +169,24 @@ function crearSolicitud() {
   localStorage.setItem("movgt_viaje", JSON.stringify(viaje));
 
   document.getElementById("pasajero").innerHTML = `
+  <button class="back" onclick="mostrarPantalla('pasajero')">
+    ← Volver a mi perfil
+  </button>
+
+  <span class="tag">SOLICITUD ENVIADA</span>
+  <h1>¡Estamos buscando!</h1>
+
+  <div class="panel">
+    <h2>Resumen de tu viaje</h2>
+    <p>Salida: ${escapar(origen)}</p>
+    <p>Destino: ${escapar(destino)}</p>
+    <p>Tarifa propuesta: Q${tarifa.toFixed(2)}</p>
+
+    <button class="primary" onclick="consultarEstado()">
+      Consultar respuesta
+    </button>
+  </div>
+`;
     <button class="back" onclick="mostrarPantalla('pasajero')">
       ← Volver a mi perfil
     </button>

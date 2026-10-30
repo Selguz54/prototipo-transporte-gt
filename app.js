@@ -1,5 +1,22 @@
 
 function mostrarPantalla(nombre) {
+  if (nombre === "pasajero" || nombre === "conductor") {
+    const guardado = localStorage.getItem("movgt_" + nombre);
+
+    if (guardado) {
+      try {
+        mostrarPerfil(JSON.parse(guardado));
+        return;
+      } catch (error) {
+        localStorage.removeItem("movgt_" + nombre);
+      }
+    }
+  }
+
+  activarPantalla(nombre);
+}
+
+function activarPantalla(nombre) {
   document.querySelectorAll(".screen").forEach(function(pantalla) {
     pantalla.classList.remove("active");
   });
@@ -48,7 +65,7 @@ function registrarUsuario(rol) {
     placa: rol === "conductor" ? valores[3] : ""
   };
 
-  localStorage.setItem("movgt_perfil", JSON.stringify(perfil));
+  localStorage.setItem("movgt_" + rol, JSON.stringify(perfil));
 
   mostrarPerfil(perfil);
 }
@@ -56,14 +73,14 @@ function registrarUsuario(rol) {
 function mostrarPerfil(perfil) {
   const pantalla = document.getElementById(perfil.rol);
 
-  let contenido = `
+  pantalla.innerHTML = `
     <button class="back" onclick="cerrarSesion()">
-      ← Cerrar sesión
+      ← Volver al inicio
     </button>
 
     <span class="tag">MI CUENTA MOVGT</span>
     <h1>¡Hola, ${escapar(perfil.nombre)}!</h1>
-    <p>Tu perfil está registrado en este dispositivo.</p>
+    <p>Tu perfil está guardado en este dispositivo.</p>
 
     <div class="panel">
       <h2>${perfil.rol === "pasajero" ? "Perfil de pasajero" : "Perfil de conductor"}</h2>
@@ -79,9 +96,8 @@ function mostrarPerfil(perfil) {
     </div>
   `;
 
-  pantalla.innerHTML = contenido;
-  mostrarPantalla(perfil.rol);
-  mostrarAviso("Perfil guardado correctamente en este dispositivo.");
+  activarPantalla(perfil.rol);
+  mostrarAviso("Perfil guardado correctamente.");
 }
 
 function escapar(texto) {
@@ -97,19 +113,5 @@ function escapar(texto) {
 }
 
 function cerrarSesion() {
-  localStorage.removeItem("movgt_perfil");
-
   location.reload();
 }
-
-window.addEventListener("DOMContentLoaded", function() {
-  const guardado = localStorage.getItem("movgt_perfil");
-
-  if (guardado) {
-    try {
-      mostrarPerfil(JSON.parse(guardado));
-    } catch (error) {
-      localStorage.removeItem("movgt_perfil");
-    }
-  }
-});

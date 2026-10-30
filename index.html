@@ -18,36 +18,66 @@
 <main class="container">
 
   <!-- INICIO -->
-  <section class="screen active" id="inicio">
-    <section class="welcome">
-      <span class="tag">PROYECTO GUATEMALTECO</span>
-      <h1>Muévete a tu manera.</h1>
-      <p>
-        Una nueva forma de conectar pasajeros y conductores,
-        con tarifas transparentes y condiciones justas para ambos.
-      </p>
-    </section>
+<section class="screen active" id="inicio">
 
-    <section class="options">
-      <button class="option" onclick="mostrarPantalla('pasajero')">
-        <span class="option-icon">🧍</span>
-        <span>
-          <strong>Quiero viajar</strong>
-          <small>Solicitar un viaje en motocicleta</small>
-        </span>
-        <span class="arrow">›</span>
-      </button>
+  <div class="home-hero">
+    <span class="tag">TU VIAJE, NUESTRA RUTA</span>
 
-      <button class="option" onclick="mostrarPantalla('conductor')">
-        <span class="option-icon">🏍️</span>
-        <span>
-          <strong>Quiero conducir</strong>
-          <small>Ofrecer viajes y recibir solicitudes</small>
+    <h1>Muévete a <span>tu manera.</span></h1>
+
+    <p>
+      Rápido, seguro y confiable.
+      Conecta con motociclistas en toda Guatemala.
+    </p>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-glow"></div>
+      <div class="hero-label">MOVILIDAD EN DOS RUEDAS</div>
+    </div>
+  </div>
+
+  <div class="home-cards">
+
+    <button class="home-card passenger-card"
+      onclick="mostrarPantalla('pasajero')">
+
+      <div class="home-card-image passenger-image"></div>
+
+      <div class="home-card-content">
+        <span class="card-tag">PASAJERO</span>
+        <h2>Quiero <span>viajar</span></h2>
+        <p>Solicita una moto y llega a tu destino sin complicaciones.</p>
+
+        <span class="card-action">
+          Solicitar viaje <span>→</span>
         </span>
-        <span class="arrow">›</span>
-      </button>
-    </section>
-  </section>
+      </div>
+    </button>
+
+    <button class="home-card driver-card"
+      onclick="mostrarPantalla('conductor')">
+
+      <div class="home-card-image driver-image"></div>
+
+      <div class="home-card-content">
+        <span class="card-tag">CONDUCTOR</span>
+        <h2>Quiero <span>conducir</span></h2>
+        <p>Genera ingresos con tu moto y trabaja cuando tú decidas.</p>
+
+        <span class="card-action">
+          Registrarme <span>→</span>
+        </span>
+      </div>
+    </button>
+
+  </div>
+
+  <div class="home-footer">
+    <strong>MOVGT</strong>
+    <p>MÁS QUE VIAJES, ES LIBERTAD</p>
+  </div>
+
+</section>
 
   <!-- PASAJERO -->
   <section class="screen" id="pasajero">

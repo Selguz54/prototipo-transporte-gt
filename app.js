@@ -90,9 +90,9 @@ function mostrarPerfil(perfil) {
         <p>Motocicleta: ${escapar(perfil.motocicleta)}</p>
         <p>Placa: ${escapar(perfil.placa)}</p>
       ` : ""}
-      <button class="primary" onclick="mostrarAviso('Esta función estará disponible próximamente.')">
-        ${perfil.rol === "pasajero" ? "Solicitar un viaje" : "Ver solicitudes de viaje"}
-      </button>
+      <button class="primary" onclick="${perfil.rol === "pasajero" ? "abrirSolicitud()" : "verSolicitudes()"}">
+  ${perfil.rol === "pasajero" ? "Solicitar un viaje" : "Ver solicitudes de viaje"}
+</button>
     </div>
   `;
 
